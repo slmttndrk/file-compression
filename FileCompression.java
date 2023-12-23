@@ -3,6 +3,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 public class FileCompression {
     public static void main(String[] args) throws Exception {
@@ -17,11 +18,16 @@ public class FileCompression {
         fileParser(filePath, dirPath, fileName);
 
         String text = readFileAsString(filePath);
-        System.out.println(text);
+
+        HashMap<Character, Integer> charFreq= new HashMap<>();
+
+        createCharacterFrequency(charFreq, text);
+        // charFreq.forEach((key, value) -> System.out.println(key + " -> " + value));
 
         writeStringAsFile(dirPath, option, fileName, text);
 
     }
+
     // parser method to parse given filepath
     private static void fileParser(StringBuilder filePath, StringBuilder dirPath, StringBuilder fileName)
     {
@@ -30,13 +36,19 @@ public class FileCompression {
         fileName.append(filePath.substring(splitIndex));
     }
 
-    // read method to convert text file into string
+    // convert text file into string
     private static String readFileAsString(StringBuilder filePath) throws IOException
     {
         return new String(Files.readAllBytes(Paths.get(String.valueOf(filePath))));
     }
 
-    // write method to convert string into text file
+    // calculate frequencies of each character
+    private static void createCharacterFrequency(HashMap<Character, Integer> charFreq, String text) {
+        for(Character c : text.toCharArray())
+            charFreq.put(c, charFreq.getOrDefault(c, 0) + 1);
+    }
+
+    // convert string into text file
     private static void writeStringAsFile(StringBuilder dirPath, StringBuilder option,
                                           StringBuilder fileName, String text) throws IOException {
 
