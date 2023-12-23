@@ -1,3 +1,5 @@
+package com.filecompression;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,6 +25,9 @@ public class FileCompression {
 
         createCharacterFrequency(charFreq, text);
         // charFreq.forEach((key, value) -> System.out.println(key + " -> " + value));
+
+        HuffmanTree hf = new HuffmanTree();
+        hf.createTree(charFreq);
 
         writeStringAsFile(dirPath, option, fileName, text);
 
