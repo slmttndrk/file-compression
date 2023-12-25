@@ -1,14 +1,9 @@
 package com.filecompression;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class HuffmanStructure {
 
@@ -22,30 +17,22 @@ public class HuffmanStructure {
 
         // fill min-priority queue with items in character-frequency map
         charFreqMap.forEach((k, v) -> priorityQueue.add(new Node(k, v)));
-        System.out.println("3. priorityQueue : ");
-        System.out.println(priorityQueue.peek().frequency);
-        System.out.println("---------------------------");
 
-        // combine nodes according to create Huffman tree
+        // combine nodes according to create Huffman algorithm
         PriorityQueue<Node> combinedPriorityQueue = combineNodes(priorityQueue);
-        System.out.println("4. combinedPriorityQueue : ");
-        System.out.println(combinedPriorityQueue.peek().frequency);
-        System.out.println("---------------------------");
 
-        // store top element of priority queue as root node of Huffman tree
+        // store top element of priority queue as root node of Huffman algorithm tree
         Node root = combinedPriorityQueue.peek();
 
         // create a map to store Huffman values of each character
         HashMap<Character, String> charHuffmanMap = new HashMap<>();
 
-        // fill character-coded string map with items in Huffman tree
+        // fill character-coded string map with items in Huffman algorithm tree
         encodeHuffman(root,"", charHuffmanMap);
 
         // loop over each character of given text to create encoded text
         for (Character c : text.toCharArray())
             encodedText.append(charHuffmanMap.get(c));
-
-        System.out.println("EncodedString is : " + encodedText.toString());
 
         // define the output path to write encoded text
         String outputPath = ap.getDirPath() + ap.getOption() + "ed-" + ap.getFileName();
@@ -60,31 +47,14 @@ public class HuffmanStructure {
     }
 
     public void decodeText(String huffmanText, HashMap<Character, String> charHuffmanMap, ArgumentsParser ap)
-            throws IOException
     {
-        {
-            // define a string to store the resulting decoded text
-//            StringBuilder decodedText = new StringBuilder();
-
-//      if(Objects.isNull(root.leftChild) && Objects.isNull(root.rightChild))
-//      {
-//          for (int i=0; i<root.frequency; i++)
-//              System.out.print(root.character);
-//      }
-//      else
-//      {
-//          System.out.println(decodeTree(root, encodedString));
-//      }
-
-//            return decodedText.toString();
-        }
-
-//        System.out.println("2. --------");
-//        charHuffmanMap.forEach((k,v) -> System.out.println(k + " -> " + v));
-
+        // define a string to store Huffman code of a character
         StringBuilder huffmanCode = new StringBuilder();
+
+        // define a string to store the resulting decoded text
         StringBuilder decodedText = new StringBuilder();
 
+        // loop over each character of given text to create decoded text
         for (int i=0; i<huffmanText.length(); i++)
         {
             huffmanCode.append(huffmanText.charAt(i));
@@ -95,8 +65,6 @@ public class HuffmanStructure {
                 huffmanCode.setLength(0);
             }
         }
-
-        System.out.println("DecodedText is : " + decodedText);
 
         // define the output path to write decoded text
         String outputPath = ap.getDirPath() + ap.getOption() + "ed-" + ap.getFileName();
@@ -120,7 +88,6 @@ public class HuffmanStructure {
 
             // combine two least frequent node pairs
             int combinationFrequency = leftChild.frequency + rightChild.frequency;
-            System.out.println(combinationFrequency);
 
             // store the combination into priority queue
             priorityQueue.add(new Node(null, combinationFrequency, leftChild, rightChild));
@@ -131,44 +98,25 @@ public class HuffmanStructure {
 
     private static void encodeHuffman(Node root, String huffmanString, HashMap<Character, String> charHuffmanMap)
     {
+        // base case for recursion
         if(Objects.isNull(root)) return;
 
+        // check if it is a leaf node, in other words, check if it is a character
         if(Objects.isNull(root.leftChild) && Objects.isNull(root.rightChild))
             charHuffmanMap.put(root.character, (huffmanString.length() > 0) ? huffmanString : "1");
 
+        // search recursively all Huffman algorithm tree
         encodeHuffman(root.leftChild, huffmanString + "0", charHuffmanMap);
         encodeHuffman(root.rightChild, huffmanString + "1", charHuffmanMap);
     }
 
-//    private static StringBuilder decodeTree(Node root, StringBuilder huffmanString)
-//    {
-//        StringBuilder decodedString = new StringBuilder();
-////        Node current = root;
-////
-////        for (int i=0; i<huffmanString.length(); i++)
-////        {
-////            current = (huffmanString.charAt(i) == '0') ? current.leftChild : current.rightChild;
-////
-////            if(Objects.isNull(current.leftChild) && Objects.isNull(current.rightChild))
-////            {
-////                decodedString.append(current.character);
-////                current = root;
-////            }
-////        }
-//
-//        return decodedString;
-//    }
-
+    // find the character from character-Huffman map, which refers to the given Huffman code
     private Character findChar(HashMap<Character, String> charHuffmanMap, StringBuilder huffmanCode)
     {
-        List<Character> charList = charHuffmanMap
+        return charHuffmanMap
                 .entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().equals(huffmanCode.toString()))
-                .map(Map.Entry::getKey).toList();
-
-        for (Character c : charList) System.out.println(c);
-
-        return charList.get(0);
+                .map(Map.Entry::getKey).toList().get(0);
     }
 }
