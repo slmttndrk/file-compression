@@ -25,27 +25,11 @@ public class FileCompression {
         // parse arguments to extract properties of given file
         ArgumentsParser ap = new ArgumentsParser(args);
 
+        // check if user wants to compress or decompress a file
         if (ap.getOption().equals("Compress"))
         {
             // extract text from given file
-            String text = "";
-            try (FileInputStream fis = new FileInputStream(ap.getFilePath()))
-            {
-                StringBuilder builder = new StringBuilder();
-                int ch;
-                while ((ch = fis.read()) != -1)
-                {
-                    builder.append((char) ch);
-                }
-                text = builder.toString();
-
-                System.out.println("1. text : ");
-                System.out.println(text);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            String text = readUncompressedFile(ap);
 
             // create a map to store character-frequency pairs
             HashMap<Character, Integer> charFreqMap = new HashMap<>();
@@ -57,37 +41,70 @@ public class FileCompression {
             System.out.println("2. charFreqMap : ");
             charFreqMap.forEach((key, value) -> System.out.println(key + " -> " + value));
 
-            // encode or decode given text according to Huffman algorithm
-            HuffmanStructure hs = new HuffmanStructure(text, ap.getOption(),charFreqMap);
+            // create a Huffman algorithm object to encode the text
+            HuffmanStructure hs = new HuffmanStructure();
 
-            // retrieve the encoded or decoded text
-            String codedText = hs.getCodedText();
-
-            // define the output path to write coded text
-            String outputPath = ap.getDirPath() + ap.getOption() + "ed-" + ap.getFileName();
-
-            // write coded text to defined output path
-            Files.writeString(Path.of(outputPath), codedText, StandardCharsets.UTF_8);
+            // encode the text
+            hs.encodeText(text, charFreqMap, ap);
         }
         else
         {
-            String huffmanText = "";
-            Node root;
-            try (FileInputStream fis = new FileInputStream(ap.getFilePath());
-                 ObjectInputStream ois = new ObjectInputStream(fis))
-            {
-                huffmanText = (String) ois.readObject();
-                root = (Node) ois.readObject();
+            Tuple<String, HashMap<Character, String>> tuple;
+            tuple = readCompressedFile(ap);
 
-                System.out.println("1. huffmanText : ");
-                System.out.println(huffmanText);
-                System.out.println("1. rootFrequency : ");
-                System.out.println(root.frequency);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            String huffmanText = tuple.x;
+            HashMap<Character, String> charHuffmanMap = tuple.y;
+            System.out.println("2. huffmanText : ");
+            System.out.println(huffmanText);
+            System.out.println("2. charHuffmanMap : ");
+            charHuffmanMap.forEach((k,v) -> System.out.println(k + " -> " + v));
+
+            // create a Huffman algorithm object to encode the text
+            HuffmanStructure hs = new HuffmanStructure();
+
+            // decode the huffman text
+            hs.decodeText(huffmanText, charHuffmanMap, ap);
         }
+    }
+
+    private static String readUncompressedFile(ArgumentsParser ap)
+    {
+        StringBuilder builder = new StringBuilder();
+
+        try (FileInputStream fis = new FileInputStream(ap.getFilePath()))
+        {
+            int ch;
+            while ((ch = fis.read()) != -1) { builder.append((char) ch); }
+        }
+        catch (Exception e) { e.printStackTrace(); }
+
+        System.out.println("1. text : ");
+        System.out.println(builder);
+
+        return builder.toString();
+    }
+
+    private static Tuple<String, HashMap<Character, String>> readCompressedFile(ArgumentsParser ap)
+    {
+        String huffmanText = "";
+        HashMap<Character, String> charHuffmanMap = new HashMap<>();
+
+        try (FileInputStream fis = new FileInputStream(ap.getFilePath());
+             ObjectInputStream ois = new ObjectInputStream(fis))
+        {
+            huffmanText = (String) ois.readObject();
+            charHuffmanMap = (HashMap<Character, String>) ois.readObject();
+
+            System.out.println("1. huffmanText : ");
+            System.out.println(huffmanText);
+            System.out.println("1. charHuffmanMap : ");
+            charHuffmanMap.forEach((k,v) -> System.out.println(k + " -> " + v));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return new Tuple<>(huffmanText, charHuffmanMap);
     }
 }
