@@ -11,8 +11,8 @@ public class FileCompression {
         if(args.length < 1)
         {
             System.out.println("Please give a file path as command line argument!");
-            System.out.println("Compress Example: java .\\FileCompression.java C:\\Users\\x\\text.txt");
-            System.out.println("Decompress Example: java .\\FileCompression.java C:\\Users\\x\\text.txt d");
+            System.out.println("Compress Ex.: \n java .\\FileCompression.java C:\\Users\\x\\text.txt");
+            System.out.println("Decompress Ex. (d letter): \n java .\\FileCompression.java C:\\Users\\x\\text.txt d");
             return;
         }
 
@@ -40,11 +40,12 @@ public class FileCompression {
         }
         else
         {
-            // extract huffman text and character-huffman map from given filepath
-            Tuple<String, HashMap<Character, String>> tuple;
-            tuple = readCompressedFile(ap.getFilePath());
-            String huffmanText = tuple.x;
-            HashMap<Character, String> charHuffmanMap = tuple.y;
+            // extract huffman text and character-huffman map from given filepath as file properties
+            HashMap<String, HashMap<Character, String>> fileProperties = readCompressedFile(ap.getFilePath());
+
+            // store huffman text and character-huffman map which are retrieved as key-value pairs
+            String huffmanText = fileProperties.keySet().iterator().next();
+            HashMap<Character, String> charHuffmanMap = fileProperties.values().iterator().next();
 
             // create a Huffman algorithm object to decode the text
             HuffmanStructure hs = new HuffmanStructure();
@@ -68,22 +69,24 @@ public class FileCompression {
         return builder.toString();
     }
 
-    private static Tuple<String, HashMap<Character, String>> readCompressedFile(String filePath)
+    private static HashMap<String, HashMap<Character, String>> readCompressedFile(String filePath)
     {
         String huffmanText = "";
         HashMap<Character, String> charHuffmanMap = new HashMap<>();
+        HashMap<String, HashMap<Character, String>> fileProperties = new HashMap<>();
 
         try (FileInputStream fis = new FileInputStream(filePath);
              ObjectInputStream ois = new ObjectInputStream(fis))
         {
             huffmanText = (String) ois.readObject();
             charHuffmanMap = (HashMap<Character, String>) ois.readObject();
+            fileProperties.put(huffmanText, charHuffmanMap);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return new Tuple<>(huffmanText, charHuffmanMap);
+        return fileProperties;
     }
 }
