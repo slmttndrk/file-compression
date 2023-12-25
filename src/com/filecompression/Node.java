@@ -20,6 +20,7 @@ public class Node implements Comparable<Node>{
         this.rightChild = rightChild;
     }
 
+    // override the compareTo method to enable created Nodes to be sorted
     public int compareTo(Node n)
     {
         return this.frequency - n.frequency;
