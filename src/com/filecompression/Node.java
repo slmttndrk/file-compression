@@ -1,6 +1,6 @@
 package com.filecompression;
 
-public class Node {
+public class Node implements Comparable<Node>{
     Character character;
     int frequency;
     Node leftChild = null;
@@ -18,5 +18,10 @@ public class Node {
         this.frequency = frequency;
         this.leftChild = leftChild;
         this.rightChild = rightChild;
+    }
+
+    public int compareTo(Node n)
+    {
+        return this.frequency - n.frequency;
     }
 }
