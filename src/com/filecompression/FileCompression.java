@@ -71,15 +71,34 @@ public class FileCompression {
 
     private static HashMap<String, HashMap<Character, String>> readCompressedFile(String filePath)
     {
+        // create local variables to store file properties
+        HashMap<Character, String> charHuffmanMap;
+        Integer sizeOfReservedBits;
         String huffmanText = "";
-        HashMap<Character, String> charHuffmanMap = new HashMap<>();
+        byte[] encodedBytes;
         HashMap<String, HashMap<Character, String>> fileProperties = new HashMap<>();
 
+        // read given file
         try (FileInputStream fis = new FileInputStream(filePath);
              ObjectInputStream ois = new ObjectInputStream(fis))
         {
-            huffmanText = (String) ois.readObject();
             charHuffmanMap = (HashMap<Character, String>) ois.readObject();
+            sizeOfReservedBits = (Integer) ois.readObject();
+            encodedBytes = (byte[]) ois.readObject();
+
+            // convert bits to binary string
+            for (byte b : encodedBytes)
+            {
+                huffmanText += String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+            }
+
+            // handle the reserved bits in the last byte
+            String lastByte = huffmanText.substring(huffmanText.length()-8);
+            String reservedBits = lastByte.substring(8-sizeOfReservedBits);
+            huffmanText = huffmanText.substring(0, huffmanText.length()-8);
+            huffmanText += reservedBits;
+
+            // return the retrieved data
             fileProperties.put(huffmanText, charHuffmanMap);
         }
         catch (Exception e)

@@ -34,6 +34,27 @@ public class HuffmanStructure {
         for (Character c : text.toCharArray())
             encodedText.append(charHuffmanMap.get(c));
 
+        // convert binary string into a byte array
+        int encodedByteLength = (encodedText.length() + 7)/8;
+        byte[] encodedBytes = new byte[encodedByteLength];
+        int byteIndex = 0;
+
+        for (int i=0; i<encodedText.length(); i+=8)
+        {
+            if ((i+8) > encodedText.length())
+            {
+                encodedBytes[byteIndex] = (byte) Integer.parseInt(encodedText.substring(i), 2);
+            }
+            else
+            {
+                encodedBytes[byteIndex] = (byte) Integer.parseInt(encodedText.substring(i, i+8), 2);
+            }
+            byteIndex++;
+        }
+
+        // store the remaining bits information for the last byte
+        Integer sizeOfReservedBits = encodedText.length() % 8;
+
         // define the output path to write encoded text
         String outputPath = ap.getDirPath() + ap.getOption() + "ed-" + ap.getFileName();
 
@@ -41,8 +62,9 @@ public class HuffmanStructure {
         try (FileOutputStream fos = new FileOutputStream(outputPath);
                  ObjectOutputStream oos = new ObjectOutputStream(fos))
         {
-            oos.writeObject(encodedText.toString());
             oos.writeObject(charHuffmanMap);
+            oos.writeObject(sizeOfReservedBits);
+            oos.writeObject(encodedBytes);
         }
     }
 
